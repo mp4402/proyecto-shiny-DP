@@ -3,6 +3,7 @@ library(readr)
 library(dplyr)
 library(DT)
 library(readxl)
+library(highcharter)
 tabla_rating <- read_csv('ratings.csv')
 tabla_movies <- readxl::read_excel('movies.xlsm')
 tabla_genome_scores <- read_csv("genome-scores.csv")
@@ -33,4 +34,25 @@ shinyServer(function(input, output) {
       arrange(desc(relevance))
     
   })
+  
+  output$out_select_user_1 <- renderTable({
+    tabla_rating %>%
+      filter(userId == input$select_user[1]) %>%
+      left_join(tabla_movies, by = c("movieId" = "movieId")) %>%
+      group_by(genres) %>%
+      summarise(rating = mean(rating)) %>%
+      select(genres, rating)
+  })
+  
+  output$out_select_user_2 <- renderPlot({
+      browser()
+      tabla_rating %>%
+      filter(userId == input$select_user[1]) %>%
+      group_by(rating) %>%
+      summarise(cantidad = n()) %>%
+      hchart("column", hcaes(x = rating, y = cantidad)) %>%
+      hc_title(text = "<b>Cantidad de veces que realiza un mismo rating <b>")
+    })
+  
+  
 })

@@ -4,6 +4,7 @@ library(dplyr)
 library(DT)
 library(readxl)
 tabla_genome_tags <- read_csv("genome-tags.csv")
+tabla_rating <- read_csv('ratings.csv')
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
@@ -36,9 +37,15 @@ shinyUI(fluidPage(
     tabPanel('Usuario',
              sidebarLayout(
                sidebarPanel(
-                 
+                 #tabla
+                 selectInput('select_user', 'Seleccione el usuario para analizar',
+                            choices = unique(tabla_rating$userId), selected = '1', multiple = FALSE),
+                 h3("Genero y su calificacion promedio del usuario"),
+                 tableOutput('out_select_user_1')
                ),
-               sidebarPanel()
+               mainPanel(
+                 plotOutput('out_select_user_2')
+               )
              )
       
     )
