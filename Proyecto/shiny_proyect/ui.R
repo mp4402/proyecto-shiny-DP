@@ -40,6 +40,7 @@ shinyUI(fluidPage(
                  #tabla
                  selectInput('select_user', 'Seleccione el usuario para analizar',
                             choices = unique(tabla_rating$userId), selected = '1', multiple = FALSE),
+                 textInput("url_param","Marcador: ",value = ""),
                  h3("Genero y su calificacion promedio del usuario"),
                  tableOutput('out_select_user_1')
                ),

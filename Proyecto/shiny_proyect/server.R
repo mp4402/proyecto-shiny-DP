@@ -8,7 +8,7 @@ tabla_rating <- read_csv('ratings.csv')
 tabla_movies <- readxl::read_excel('movies.xlsm')
 tabla_genome_scores <- read_csv("genome-scores.csv")
 tabla_genome_tags <- read_csv("genome-tags.csv")
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   
   
   output$out_slider_input_multi<- renderTable({
@@ -44,15 +44,50 @@ shinyServer(function(input, output) {
       select(genres, rating)
   })
   
+  observe({
+    query <- parseQueryString(session$clientData$url_search)
+    userId <- query[["userId"]]
+    if(!is.null(userId)){
+      updateSelectInput(session, "select_user", selected=userId)
+    }
+
+
+  })
+
+  
+  observe({
+    
+    userId<-input$select_user
+    
+    if(session$clientData$url_port==''){
+      x <- NULL
+    } else {
+      x <- paste0(":",
+                  session$clientData$url_port)
+    }
+    
+    marcador<-paste0("http://",
+                     session$clientData$url_hostname,
+                     x,
+                     session$clientData$url_pathname,
+                     "?","userId=",
+                     userId)
+    updateTextInput(session,"url_param",value = marcador)
+    
+  })
+  
   output$out_select_user_2 <- renderPlot({
-      browser()
-      tabla_rating %>%
+    tabla_rating %>%
       filter(userId == input$select_user[1]) %>%
       group_by(rating) %>%
-      summarise(cantidad = n()) %>%
-      hchart("column", hcaes(x = rating, y = cantidad)) %>%
-      hc_title(text = "<b>Cantidad de veces que realiza un mismo rating <b>")
-    })
+      summarise(cantidad = n())%>%
+      ggplot(aes(x = rating, y = cantidad)) + 
+      geom_col(fill = 'royalblue4') +
+      scale_x_continuous(labels = scales::label_number()) +
+      labs(title = element_text("")) +
+      ylab("Quantity")
+    
+  })
   
   
 })
